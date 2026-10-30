@@ -1,0 +1,2 @@
+# Install as /etc/cron.d/convert AFTER replacing paths and checking Unix line endings.
+* * * * * convert cd /srv/convert/current && /usr/bin/php artisan schedule:run >> /srv/convert/shared/storage/logs/scheduler.log 2>&1

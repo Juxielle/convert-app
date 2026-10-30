@@ -1,0 +1,30 @@
+[Unit]
+Description=Convert private conversion worker
+After=network.target
+
+[Service]
+Type=simple
+User=convert
+Group=convert
+WorkingDirectory=/srv/convert/current
+ExecStart=/usr/bin/php artisan queue:work database --queue=conversions --sleep=1 --timeout=240 --memory=256 --max-time=3600
+Restart=always
+RestartSec=5
+TimeoutStopSec=260
+KillMode=control-group
+UMask=0007
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/convert/shared/storage /srv/convert/current/bootstrap/cache
+MemoryMax=1G
+CPUQuota=75%
+TasksMax=64
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+# Keep DB local via loopback or a Unix socket. Deny native outbound connections.
+IPAddressDeny=any
+IPAddressAllow=localhost
+
+[Install]
+WantedBy=multi-user.target

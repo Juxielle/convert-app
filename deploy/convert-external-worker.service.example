@@ -1,0 +1,29 @@
+[Unit]
+Description=Convert approved public-library downloads
+After=network.target
+
+[Service]
+Type=simple
+User=convert-external
+Group=convert
+WorkingDirectory=/srv/convert/current
+ExecStart=/usr/bin/php artisan queue:work database --queue=external-downloads --sleep=1 --timeout=240 --memory=256 --max-time=3600
+Restart=always
+RestartSec=5
+TimeoutStopSec=260
+KillMode=control-group
+UMask=0007
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/convert/shared/storage /srv/convert/current/bootstrap/cache
+MemoryMax=768M
+CPUQuota=50%
+TasksMax=32
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+# This separate service needs DNS and HTTPS to Commons/CDN; configure the host egress policy.
+# The conversion service remains Internet-denied. Never grant SMTP or unrelated services here.
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,41 @@
+# Adapt the hostname, certificate and PHP-FPM socket before installation.
+<VirtualHost *:80>
+    ServerName convert.example
+    Redirect permanent / https://convert.example/
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName convert.example
+    DocumentRoot /srv/convert/current/public
+    SSLEngine on
+    SSLCertificateFile /etc/letsencrypt/live/convert.example/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/convert.example/privkey.pem
+    Protocols h2 http/1.1
+    LimitRequestBody 110000000
+    <Directory /srv/convert/current/public>
+        Options -Indexes +FollowSymLinks
+        AllowOverride None
+        Require all granted
+        DirectoryIndex index.php
+        RewriteEngine On
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteRule ^ index.php [L]
+        <FilesMatch "\.php$">
+            SetHandler "proxy:unix:/run/php/php8.3-fpm.sock|fcgi://localhost"
+        </FilesMatch>
+        <FilesMatch "^\.">
+            Require all denied
+        </FilesMatch>
+    </Directory>
+    <LocationMatch "^/(?:api|profil|mes-fichiers|administration|connexion|inscription|reinitialiser-mot-de-passe|mot-de-passe-oublie)(?:/|$)">
+        Header always set X-Robots-Tag "noindex, nofollow"
+    </LocationMatch>
+    <LocationMatch "^/build/">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </LocationMatch>
+    # No query string, cookies, Authorization, IP, Referer or request body in this dedicated access log.
+    LogFormat "%t %m %U %>s %D" convert_minimal
+    CustomLog /var/log/apache2/convert-access.log convert_minimal
+    ErrorLog /var/log/apache2/convert-error.log
+</VirtualHost>

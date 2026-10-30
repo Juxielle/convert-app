@@ -1,0 +1,4 @@
+{
+    "preset": "laravel",
+    "exclude": [".tools", ".cache", "vendor", "node_modules", "public/build"]
+}

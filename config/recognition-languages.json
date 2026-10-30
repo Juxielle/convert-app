@@ -1,0 +1,23 @@
+[
+  {"code":"fr","label":"Français","ocr":"fra","speech":"fr"},
+  {"code":"en","label":"Anglais","ocr":"eng","speech":"en"},
+  {"code":"es","label":"Espagnol","ocr":"spa","speech":"es"},
+  {"code":"pt","label":"Portugais","ocr":"por","speech":"pt"},
+  {"code":"de","label":"Allemand","ocr":"deu","speech":"de"},
+  {"code":"it","label":"Italien","ocr":"ita","speech":"it"},
+  {"code":"ar","label":"Arabe","ocr":"ara","speech":"ar"},
+  {"code":"zh","label":"Chinois simplifié (mandarin à l’oral)","ocr":"chi_sim","speech":"zh"},
+  {"code":"zh-tw","label":"Chinois traditionnel (OCR)","ocr":"chi_tra","speech":null},
+  {"code":"hi","label":"Hindi","ocr":"hin","speech":"hi"},
+  {"code":"ru","label":"Russe","ocr":"rus","speech":"ru"},
+  {"code":"ja","label":"Japonais","ocr":"jpn","speech":"ja"},
+  {"code":"ko","label":"Coréen","ocr":"kor","speech":"ko"},
+  {"code":"bn","label":"Bengali","ocr":"ben","speech":"bn"},
+  {"code":"id","label":"Indonésien","ocr":"ind","speech":"id"},
+  {"code":"tr","label":"Turc","ocr":"tur","speech":"tr"},
+  {"code":"vi","label":"Vietnamien","ocr":"vie","speech":"vi"},
+  {"code":"ur","label":"Ourdou","ocr":"urd","speech":"ur"},
+  {"code":"pa","label":"Pendjabi","ocr":"pan","speech":"pa"},
+  {"code":"fa","label":"Persan","ocr":"fas","speech":"fa"},
+  {"code":"sw","label":"Swahili","ocr":"swa","speech":"sw"}
+]

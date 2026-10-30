@@ -1,0 +1,107 @@
+[
+  {
+    "code": "fr",
+    "text": "Bonjour le monde",
+    "expected": "Bonjour"
+  },
+  {
+    "code": "en",
+    "text": "Welcome to the world",
+    "expected": "Welcome"
+  },
+  {
+    "code": "es",
+    "text": "Hola mundo",
+    "expected": "Hola"
+  },
+  {
+    "code": "pt",
+    "text": "Olá mundo",
+    "expected": "mundo"
+  },
+  {
+    "code": "de",
+    "text": "Guten Morgen",
+    "expected": "Morgen"
+  },
+  {
+    "code": "it",
+    "text": "Buongiorno mondo",
+    "expected": "mondo"
+  },
+  {
+    "code": "ar",
+    "text": "مرحبا بالعالم",
+    "expected": "العالم"
+  },
+  {
+    "code": "zh",
+    "text": "你好世界 测试文字",
+    "expected": "世界"
+  },
+  {
+    "code": "zh-tw",
+    "text": "你好世界 測試文字",
+    "expected": "文字"
+  },
+  {
+    "code": "hi",
+    "text": "भारत नमस्ते",
+    "expected": "भारत"
+  },
+  {
+    "code": "ru",
+    "text": "Привет мир",
+    "expected": "Привет"
+  },
+  {
+    "code": "ja",
+    "text": "こんにちは 世界",
+    "expected": "世界"
+  },
+  {
+    "code": "ko",
+    "text": "안녕하세요 세계",
+    "expected": "세계"
+  },
+  {
+    "code": "bn",
+    "text": "বাংলা ভাষা",
+    "expected": "বাংলা"
+  },
+  {
+    "code": "id",
+    "text": "Selamat pagi",
+    "expected": "Selamat"
+  },
+  {
+    "code": "tr",
+    "text": "Merhaba dünya",
+    "expected": "Merhaba"
+  },
+  {
+    "code": "vi",
+    "text": "Xin chào thế giới",
+    "expected": "chào"
+  },
+  {
+    "code": "ur",
+    "text": "پاکستان کی زبان اردو ہے\nیہ ایک آسان امتحان ہے\nخوش آمدید",
+    "expected": "پاکستان"
+  },
+  {
+    "code": "pa",
+    "text": "ਪੰਜਾਬ ਭਾਸ਼ਾ",
+    "expected": "ਪੰਜਾਬ"
+  },
+  {
+    "code": "fa",
+    "text": "سلام دنیا\nاین یک آزمایش فارسی است\nخوش آمدید",
+    "expected": "سلام"
+  },
+  {
+    "code": "sw",
+    "text": "Habari dunia",
+    "expected": "Habari"
+  }
+]

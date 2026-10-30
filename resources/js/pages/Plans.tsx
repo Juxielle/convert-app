@@ -1,0 +1,45 @@
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowRight, Check, Clock3, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { api, useSession } from '../lib/api';
+import type { BillingPeriod, PricingPlan } from '../lib/plans';
+import { quotaLabels, quotaValue } from '../lib/plans';
+import { ErrorState, Loading, Notice } from '../components/ui';
+
+export default function Plans() {
+  const [period, setPeriod] = useState<BillingPeriod>('monthly');
+  const session = useSession();
+  const plans = useQuery({ queryKey: ['plans'], queryFn: ({ signal }) => api<PricingPlan[]>('/plans', signal), staleTime: 30000 });
+  const free = plans.data?.find(plan => plan.is_free);
+  const rows = ['max_file_bytes', 'daily_jobs', 'monthly_jobs', 'concurrent_jobs', 'history_hours', 'retention_hours'];
+  return <section className="container page-section pricing-page"><title>Tarifs — Convert</title>
+    <div className="pricing-intro"><span className="eyebrow">VOS FICHIERS, À VOTRE RYTHME</span><h1>Le bon plan.<br /><span>Pour chaque volume.</span></h1><p className="page-lead">Commencez avec la formule gratuite ou choisissez un accès plus complet adapté à vos besoins.</p><div className="pricing-trust"><span><ShieldCheck size={16} />Fichiers privés</span><span><Check size={16} />Conditions avant confirmation</span><span><Clock3 size={16} />Sans renouvellement automatique</span></div>
+      <div className="pricing-period" role="group" aria-label="Périodicité"><button aria-pressed={period === 'monthly'} onClick={() => setPeriod('monthly')}>Mensuel</button><button aria-pressed={period === 'yearly'} onClick={() => setPeriod('yearly')}>Annuel</button></div><small>Comparez les montants annuels aux douze paiements mensuels. Les économies ci-dessous sont calculées par le serveur.</small>
+    </div>
+    {plans.isPending ? <Loading label="Chargement des offres…" /> : plans.error ? <ErrorState message={plans.error.message} retry={() => { void plans.refetch(); }} /> : <>
+      <div className="pricing-grid">{plans.data?.map(plan => {
+        const price = period === 'monthly' ? plan.monthly_price : plan.yearly_price;
+        const supported = plan.is_free || plan.billing_periods.includes(period);
+        const trial = !!plan.trial_enabled && !!plan.trial_days && plan.available && (!(plan.payment_available || plan.trial_requires_payment) || !!plan.trial_payment_setup_available);
+        return <article className={`pricing-card${plan.is_free ? ' pricing-card-free' : ''}`} key={plan.id}><span className={`plan-badge${plan.is_free ? ' plan-badge-free' : ''}`}>{plan.is_free ? 'Gratuit' : trial ? `${plan.trial_days} jours d’essai` : plan.payment_available ? 'Paiement SasPay' : 'Bientôt disponible'}</span><h2>{plan.name}</h2><p className="pricing-description">{plan.description}</p>
+          <div className="pricing-price">{supported && price !== null ? <><strong>{price.toLocaleString('fr')}</strong><span>FCFA<small>{plan.is_free ? 'sans limite de durée' : `/${period === 'monthly' ? 'mois' : 'an'}`}</small></span></> : <strong className="price-pending">{supported ? 'Tarif à définir' : 'Périodicité indisponible'}</strong>}</div>
+          {!plan.is_free && !!plan.annual_savings && <p className="annual-saving">{plan.annual_free_months} mois offerts en annuel · {plan.annual_savings.toLocaleString('fr')} FCFA économisés / an</p>}
+          <ul className="pricing-features">{plan.features.map(feature => <li key={feature}><Check size={16} /><span>{feature}</span></li>)}</ul><dl className="pricing-quotas">{['max_file_bytes', plan.limits?.monthly_jobs ? 'monthly_jobs' : 'daily_jobs', 'concurrent_jobs', 'history_hours'].map(key => <div key={key}><dt>{quotaLabels[key]}</dt><dd>{quotaValue(key, plan.limits?.[key as keyof NonNullable<typeof plan.limits>])}</dd></div>)}</dl>
+          <div className="pricing-cta">{plan.is_free ? <><Link className="button primary full-width" to="/outils">Commencer gratuitement <ArrowRight size={16} /></Link><Link className="quiet-link" to={session.data?.user ? '/mon-abonnement' : '/inscription'}>{session.data?.user ? 'Mon abonnement' : 'Créer un compte gratuit'}</Link></> : supported && price !== null ? <><Link className="button primary full-width" to={`/souscription?plan=${plan.id}&period=${period}&mode=${trial ? 'trial' : 'pay'}`}>{trial ? `Essayer gratuitement pendant ${plan.trial_days} jours` : 'Choisir cette formule'}<ArrowRight size={16} /></Link><Link className="quiet-link" to={`/souscription?plan=${plan.id}&period=${period}&mode=pay`}>Payer maintenant</Link><small>{plan.payment_available ? 'Paiement sécurisé sur SasPay ; activation après confirmation.' : 'Le paiement sera bientôt disponible ; aucun débit simulé.'}</small></> : <button className="button secondary" disabled>Bientôt disponible</button>}</div>
+        </article>;
+      })}</div>
+      <section className="pricing-comparison"><h2>Chaque limite, en toute transparence</h2><div className="table-scroll"><table><caption className="sr-only">Comparaison des formules</caption><thead><tr><th scope="col">Votre accès</th>{plans.data?.map(plan => <th key={plan.id} scope="col">{plan.name}</th>)}</tr></thead><tbody>{rows.map(key => <tr key={key}><th scope="row">{quotaLabels[key]}</th>{plans.data?.map(plan => <td key={plan.id}>{key === 'daily_jobs' && plan.limits?.monthly_jobs ? 'Dans la limite mensuelle' : quotaValue(key, plan.limits?.[key as keyof NonNullable<typeof plan.limits>])}</td>)}</tr>)}{[['priority_processing', 'Traitement prioritaire'], ['advanced_conversions', 'Conversions avancées (détourage, OCR, transcription)'], ['batch_processing', 'Traitement par lots'], ['priority_support', 'Support prioritaire']].map(([key, label]) => <tr key={key}><th scope="row">{label}</th>{plans.data?.map(plan => <td key={plan.id}>{plan.entitlements?.[key] ? 'Inclus' : 'Non inclus'}</td>)}</tr>)}</tbody></table></div></section>
+      {free && <details className="panel pricing-tools"><summary>Outils standard inclus dans le Gratuit ({free.tools.length})</summary><ul>{free.tools.map(tool => <li key={tool.slug}><Link to={`/outils/${tool.slug}`}>{tool.name}</Link></li>)}</ul></details>}
+      <Notice>Les tailles affichées sont les plafonds de votre formule. Chaque format conserve ses limites de sécurité (taille, durée, résolution, pages). Les tâches simultanées incluent les tâches en attente et en traitement ; l’exécution dépend des ressources du serveur. L’historique concerne les métadonnées des tâches, pas la conservation des fichiers, indiquée séparément. Les quotas mensuels portent sur {plans.data?.find(plan => !plan.is_free)?.monthly_window_days ?? ''} jours glissants et ne se réinitialisent pas en changeant de formule ou de périodicité.</Notice>
+    </>}
+    <section className="pricing-faq narrow"><span className="eyebrow">VOS QUESTIONS</span><h2>Abonnements et essais</h2><div className="faq-list">
+      <details><summary>Comment fonctionne l’essai gratuit ?<span>+</span></summary><p>{plans.data?.some(plan => plan.trial_requires_payment && !plan.trial_payment_setup_available) ? 'L’essai nécessite la validation de vos informations de paiement sans débit. Cette validation n’est pas encore disponible ; les nouveaux essais sont temporairement suspendus. La formule gratuite reste accessible.' : 'Après connexion, choisissez une formule, sa périodicité et l’essai. Vérifiez le récapitulatif puis confirmez. Ses quotas et fonctionnalités sont activés jusqu’à la date de fin affichée.'}</p></details>
+      <details><summary>Puis-je recommencer l’essai avec une autre formule ?<span>+</span></summary><p>{plans.data?.find(plan => !plan.is_free)?.trial_policy}</p></details>
+      <details><summary>Que se passe-t-il à la fin de l’essai ?<span>+</span></summary><p>Sans paiement confirmé, votre compte revient automatiquement au Gratuit. Des notifications dans Mon abonnement vous préviennent avant la fin. Aucun prélèvement automatique ni reconduction payante ne sont effectués.</p></details>
+      <details><summary>Pourquoi choisir le paiement annuel ?<span>+</span></summary><p>Le tableau affiche les prix et l’économie configurés pour chaque formule. L’essai donne les mêmes droits quelle que soit la périodicité choisie. Aucun montant n’est prélevé pendant l’essai.</p></details>
+      <details><summary>Le paiement est-il disponible ?<span>+</span></summary><p>{plans.data?.some(plan => plan.payment_available) ? 'Oui, via la page sécurisée SasPay. Les moyens de paiement proposés dépendent de votre pays. Votre formule est activée après vérification du paiement.' : 'Le paiement n’est pas encore disponible. Vous pouvez préparer une demande sans activation de droits payants.'}</p></details>
+      <details><summary>Puis-je modifier ma périodicité ?<span>+</span></summary><p>Pendant l’essai, elle peut être modifiée dans <Link to="/mon-abonnement">Mon abonnement</Link>, sans prolonger sa durée ni remettre les quotas à zéro. Un changement payant de formule nécessitera une confirmation réelle du paiement.</p></details>
+    </div></section>
+  </section>;
+}
